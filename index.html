@@ -41,8 +41,8 @@
            display: block;
            margin: 4px 0;
         }
-		button {
-           fill: grey;
+		.chartButton {
+			color: black;
         }
 
     </style>
@@ -55,8 +55,8 @@
      <div align ="center" style="color:red">
 			From : <input type="date" name="field1" id="field1" style="color:red" min ="2016-05-01" value="2016-05-05"/>
 			To :   <input type="date" name="field2" id="field2" style="color:red" min ="2016-05-01" value="2016-05-20"/>
-			<input type="button" onclick="updateDateFilter()" value="Update Chart" />
-            <input type="button" onclick="resetDateFilter()" value="Reset Chart" />
+			<input class = 'chartButton' type="button" onclick="updateDateFilter()" value="Update Chart" />
+            <input class = 'chartButton' type="button" onclick="resetDateFilter()" value="Reset Chart" />
     </div>
     
     <svg width="1350" height="700"></svg>
