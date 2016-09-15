@@ -1,0 +1,269 @@
+<!doctype html>
+<html>
+<head>
+    
+    <title>Daily Counts Tracking</title>
+    
+    <script src="//d3js.org/d3.v4.min.js"></script>
+    <meta charset="UTF-8">
+    
+    <style>
+        
+        * {
+        color: white;
+        fill:white;
+        }
+
+        .axis--x path {
+          display: none;
+        }
+        
+        
+        .line {
+          fill: none;
+          stroke: steelblue;
+          stroke-width: 2.5px;
+        }
+        
+        #floater {
+            text-align: left;
+            position: absolute;
+            width: 150px;
+            top:0px;
+            left:0px;
+            visibility: hidden;
+            font-size: 22px;
+            color: white;
+            background-color: none;
+            padding: 10px;
+        }
+        br {
+           display: block;
+           margin: 4px 0;
+        }
+
+    </style>
+    
+    
+</head>
+<body style="background-color:black;">
+    <h1 align="center">2016 Presidential Candidates Directed Tweets (@) Volume</h1>
+    
+     <div align ="center" style="color:red">
+			From : <input type="date" name="field1" id="field1" style="color:red" min ="2016-05-01" value="2016-05-05"/>
+			To :   <input type="date" name="field2" id="field2" style="color:red" min ="2016-05-01" value="2016-05-20"/>
+			<input type="button" onclick="updateDateFilter()" value="Update Chart" />
+            <input type="button" onclick="resetDateFilter()" value="Reset Chart" />
+    </div>
+    
+    <svg width="1350" height="700"></svg>
+
+    <div id="floater">
+        <span id="hashtag" style="font-weight: bold"></span><br />
+    </div>
+    
+    <script>
+    
+    console.log(document.getElementById('field1').value)
+    
+    var date1;
+    var date2;    
+    var ids;
+    var myData;
+    var allCities;
+    var allData;
+    var filterOn = false;
+        
+    var parseTime = d3.timeParse("%Y-%m-%d");
+    //var	parseDate = d3.time.format("%Y-%m-%d").parse;
+
+    d3.csv("daily_volume.csv", type, function(error, data) {
+        if (error) throw error;
+        ids = data.columns.slice(1);
+        console.log(ids)
+        allCities = ids.map(function(id) {
+            return {
+                id: id,
+                values: data.map(function(d) {
+                    return {date: d.date, temperature: d[id]};
+                })
+            };
+        });
+        //allCities = cities;
+        //myData = data;
+        allData = data;
+        makeChart(allData, allCities, filterOn);
+    });
+        
+    function makeChart(data, cities, filterByDates) {
+        
+        var windowWidth = window.innerWidth - 100;
+        var windowHieght = window.innerHeight - 200;
+        
+        var svg = d3.select("svg"),
+            margin = {top: 20, right: 10, bottom: 30, left: 50},
+            width = windowWidth - margin.left - margin.right,
+            height = windowHieght - margin.top - margin.bottom,
+            g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        
+        var x = d3.scaleTime().range([0, width]),
+            y = d3.scaleLinear().range([height, 0]),
+            z = d3.scaleOrdinal(['blue','red']);
+        
+        var line = d3.line()
+            .curve(d3.curveBasis)
+            .x(function(d) { return x(d.date); })
+            .y(function(d) { return y(d.temperature); });
+
+        d3.selectAll(".city").remove(); 
+        //d3.selectAll(".labels").remove();
+        d3.selectAll(".axis.axis--x").remove();
+        d3.selectAll(".axis.axis--y").remove();
+        
+        if(filterByDates) {
+            date1 = parseTime(document.getElementById('field1').value);
+            date2 = parseTime(document.getElementById('field2').value);
+            //var date1 = document.getElementById('field1').value;
+            //var date2 = document.getElementById('field2').value;
+            data = data.filter(function(d) {if(d.date >= date1 && d.date <= date2) return d;});
+            console.log(data)
+            
+            cities = ids.map(function(id) {
+                return {
+                  id: id,
+                  values: data.map(function(d) { if(d.date >= date1 && d.date <= date2)
+                    return {date: d.date, temperature: d[id]};
+                  })
+                };
+              });
+
+            //console.log(cities[0]['values'].length);
+            
+            
+        }
+        //console.log(data)
+        
+        //console.log(cities[0]['values'].length);
+        
+        x.domain(d3.extent(data, function(d) { return d.date; }));
+
+        y.domain([
+            d3.min(cities, function(c) { return d3.min(c.values, function(d) { return d.temperature; }); }),
+            d3.max(cities, function(c) { return d3.max(c.values, function(d) { return d.temperature; }); })
+          ]);
+
+        //y.domain([0,60000]);
+          z.domain(cities.map(function(c) { return c.id; }));
+        console.log(height)
+          g.append("g")
+              .attr("class", "axis axis--x")
+              .attr("transform", "translate(0," + height + ")")
+              .call(d3.axisBottom(x));
+
+
+          g.append("g")
+              .attr("class", "axis axis--y")
+              .call(d3.axisLeft(y))
+            .append("text")
+              .attr("transform", "rotate(-90)")
+              .attr("y", 6)
+              .attr("dy", "0.71em")
+              .attr("fill", "white")
+              .text("Number of Tweets");
+
+          var city = g.selectAll(".city")
+            .data(cities)
+            .enter().append("g")
+              .attr("class", "city");
+
+          city.append("path")
+              .attr("class", "line")
+              .attr("d", function(data) { return line(data.values); })
+              .style("stroke", function(data) { return z(data.id); })
+            .attr("id",function(data) { return data.id; })
+            .on("mouseover",showHashtag)
+            .on("mouseout",hideHashtag)
+            //.on("click",clearLine)
+
+          ;
+        
+        
+        }
+      //city.append("text")
+      //    .datum(function(d) { return {id: d.id, value: d.values[d.values.length - 2]}; })
+      //    .attr("transform", function(d) { return "translate(" + x(d.value.date) + "," + y(d.value.temperature) + ")"; })
+      //    .attr("x", 3)
+      //    .attr("dy", "0.55em")
+      //    .style("font", "10px sans-serif")
+      //  .attr("fill", "white")
+      //    .text(function(d) { return d.id; });
+    
+
+    function type(d, _, columns) {
+      d.date = parseTime(d.date);
+      for (var i = 1, n = columns.length, c; i < n; ++i) d[c = columns[i]] = +d[c];
+      return d;
+    }
+    
+    // Setting up Alt Text for the Lines with Hashtag
+    function showHashtag(){
+        console.log('Showing #tag')
+        console.log(this.id)
+        d3.select("#hashtag").text(this.id);
+        //d3.select("#plantState").text(data[i]["Plant state abbreviation"]);
+        //console.log(this.debateName2)
+        d3.select("#floater")
+            //.style("top",circle.attr("cy") + "px")
+            //.style("left",circle.attr("cx") + "px")
+            .style("top", (d3.event.pageY-20) + "px")
+            .style("left", (d3.event.pageX)+ "px")
+            .style("visibility","visible");
+            ;
+    }
+
+    function hideHashtag(){
+        console.log('hide #tag')
+        d3.select("#floater")
+            //.style("top",circle.attr("cy") + "px")
+            //.style("left",circle.attr("cx") + "px")
+            //.style("top", d3.event.pageY + "px")
+            //.style("left", d3.event.pageX + "px")
+            .style("visibility","hidden");
+            ;
+    }
+        
+    function clearLine(){
+        console.log('delete this line');
+        d3.select(this)
+            .attr("opacity", 0);
+        ;
+    }
+    
+    function getDates() {
+            return [document.getElementById('field1').value, document.getElementById('field2').value];
+        }
+    
+    // Change size of the plot when the browser window is re-sized
+    window.onresize = function(event) {
+        makeChart(allData, allCities, filterOn)
+        console.log(window.innerHeight);
+        console.log(window.innerWidth)
+    };
+        
+    function updateDateFilter(){
+        console.log('called updateDateFilter');
+        filterOn = true;
+        makeChart(allData, allCities, filterOn) 
+    };
+        
+    function resetDateFilter(){
+        console.log('called resetDateFilter');
+        filterOn = false;
+        makeChart(allData, allCities, filterOn) 
+    };
+
+    </script>
+	
+	<p>Note: This data was acquired by the Twitter API collecting all @Candidate tweets available for that day. This analysis is subject to the availability and sampling methods of information made available through the Twitter API. For questions, please contact Hope McIntyre hm7zg@virginia.edu or ... </p>
+</body>
+</html>
