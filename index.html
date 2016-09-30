@@ -51,14 +51,13 @@
 </head>
 <body style="background-color:black;">
     <h1 align="center">2016 Presidential Candidates Directed Tweets (@) Volume</h1>
-    
-     <div align ="center" style="color:red">
-			From : <input type="date" name="field1" id="field1" style="color:red" min ="2016-05-01" value="2016-05-05"/>
-			To :   <input type="date" name="field2" id="field2" style="color:red" min ="2016-05-01" value="2016-05-20"/>
-			<input class = 'chartButton' type="button" onclick="updateDateFilter()" value="Update Chart" />
-            <input class = 'chartButton' type="button" onclick="resetDateFilter()" value="Reset Chart" />
+	
+	 <div align=center>
+		 <span style="color:blue">HillaryClinton</span>
+		 <span style="color:black"> </span>
+		 <span style="color:red">realDonaldTrump</span>
     </div>
-    
+	
     <svg width="1350" height="700"></svg>
 
     <div id="floater">
@@ -67,7 +66,6 @@
     
     <script>
     
-    console.log(document.getElementById('field1').value)
     
     var date1;
     var date2;    
@@ -77,10 +75,10 @@
     var allData;
     var filterOn = false;
         
-    var parseTime = d3.timeParse("%Y-%m-%d");
+    var parseTime = d3.timeParse("%Y-%m-%d %H:%M:%S");
     //var	parseDate = d3.time.format("%Y-%m-%d").parse;
 
-    d3.csv("daily_volume.csv", type, function(error, data) {
+    d3.csv("minute_volume.csv", type, function(error, data) {
         if (error) throw error;
         ids = data.columns.slice(1);
         console.log(ids)
@@ -114,7 +112,7 @@
             z = d3.scaleOrdinal(['blue','red']);
         
         var line = d3.line()
-            .curve(d3.curveBasis)
+            .curve(d3.curveLinear)
             .x(function(d) { return x(d.date); })
             .y(function(d) { return y(d.temperature); });
 
