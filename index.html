@@ -52,6 +52,11 @@
 <body style="background-color:black;">
     <h1 align="center">2016 Presidential Candidates Directed Tweets (@) Volume</h1>
 	
+	<form align="center" onClick="getData()">
+	  <input type="radio" name="debate" value="20161005" checked="checked"> Oct. 5 VP Debate<br>
+	  <input type="radio" name="debate" value="20160926"> Sept. 26 Pres Debate<br>
+	</form>
+	
 	 <div align=center>
 		 <span style="color:blue">HillaryClinton</span>
 		 <span style="color:black"> </span>
@@ -77,25 +82,42 @@
         
     var parseTime = d3.timeParse("%Y-%m-%d %H:%M:%S");
     //var	parseDate = d3.time.format("%Y-%m-%d").parse;
+		
+	function getRadioValue(theRadioGroup){
+		var elements = document.getElementsByName(theRadioGroup);
+		for (var i = 0, l = elements.length; i < l; i++)
+		{
+			if (elements[i].checked)
+			{
+				return elements[i].value;
+			}
+		}
+	}
 
-    d3.csv("minute_volume.csv", type, function(error, data) {
-        if (error) throw error;
-        ids = data.columns.slice(1);
-        console.log(ids)
-        allCities = ids.map(function(id) {
-            return {
-                id: id,
-                values: data.map(function(d) {
-                    return {date: d.date, temperature: d[id]};
-                })
-            };
-        });
-        //allCities = cities;
-        //myData = data;
-        allData = data;
-        makeChart(allData, allCities, filterOn);
-    });
-        
+	function getData(){
+		console.log(getRadioValue('debate'));
+		//fileName = "minute_volume_" +getRadioValue('debate')+".csv"
+		fileName = "minute_volume.csv"
+		d3.csv(fileName, type, function(error, data) {
+			if (error) throw error;
+			ids = data.columns.slice(1);
+			console.log(ids)
+			allCities = ids.map(function(id) {
+				return {
+					id: id,
+					values: data.map(function(d) {
+						return {date: d.date, temperature: d[id]};
+					})
+				};
+			});
+			//allCities = cities;
+			//myData = data;
+			allData = data;
+			makeChart(allData, allCities, filterOn);
+		});
+    }
+	getData();
+		
     function makeChart(data, cities, filterByDates) {
         
         var windowWidth = window.innerWidth - 100;
@@ -265,6 +287,6 @@
 
     </script>
 	
-	<p>Note: This data was acquired by the Twitter API collecting all @Candidate tweets available for that day. This analysis is subject to the availability and sampling methods of information made available through the Twitter API. For questions, please contact Hope McIntyre hm7zg@virginia.edu or ... </p>
+	<p>Note: These graphs were produced by the University of Virginia's Twitter Visualization Project. Data were acquired via the Twitter API, collecting all @candidate tweets available for that day. This analysis reflects the availability and sampling methods of information made available through the Twitter API. For questions, please contact Hope McIntyre (hm7zg@virginia.edu), Paul Freedman (pf7h@virginia.edu), or David Leblang (dal7w@virginia.edu).</p>
 </body>
 </html>
