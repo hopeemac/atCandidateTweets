@@ -46,21 +46,32 @@
         }
 
     </style>
+	
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+	  ga('create', 'UA-73887344-1', 'auto');
+	  ga('send', 'pageview');
+
+	</script>
     
     
 </head>
 <body style="background-color:black;">
-    <h1 align="center">2016 Presidential Candidates Directed Tweets (@) Volume</h1>
+    <h1 align="center">2016 Presidential Election Debates - Directed Tweets (@) Volume</h1>
 	
-	<form align="center" onClick="getData()">
-	  <input type="radio" name="debate" value="20161005" checked="checked"> Oct. 5 VP Debate<br>
+	<form align="center" onClick="changeDebate()">
+	  <input type="radio" name="debate" value="20161004" checked="checked"> Oct. 4 VP Debate<br>
 	  <input type="radio" name="debate" value="20160926"> Sept. 26 Pres Debate<br>
 	</form>
 	
 	 <div align=center>
-		 <span style="color:blue">HillaryClinton</span>
+		 <span style="color:blue" id='democrat'>HillaryClinton</span>
 		 <span style="color:black"> </span>
-		 <span style="color:red">realDonaldTrump</span>
+		 <span style="color:red" id='republican'>realDonaldTrump</span>
     </div>
 	
     <svg width="1350" height="700"></svg>
@@ -95,9 +106,19 @@
 	}
 
 	function getData(){
+		
+		if(getRadioValue('debate') == 20161004){
+			d3.select('#democrat').text('timkaine')
+			d3.select('#republican').text('mike_pence')
+		}
+		else{
+			d3.select('#democrat').text('HillaryClinton')
+			d3.select('#republican').text('realDonaldTrump')
+		}
+		
 		console.log(getRadioValue('debate'));
-		//fileName = "minute_volume_" +getRadioValue('debate')+".csv"
-		fileName = "minute_volume.csv"
+		fileName = "minute_volume_" +getRadioValue('debate')+".csv"
+		//fileName = "minute_volume.csv"
 		d3.csv(fileName, type, function(error, data) {
 			if (error) throw error;
 			ids = data.columns.slice(1);
@@ -284,9 +305,14 @@
         filterOn = false;
         makeChart(allData, allCities, filterOn) 
     };
+		
+	function changeDebate(){
+		
+		getData();
+	}
 
     </script>
 	
-	<p>Note: These graphs were produced by the University of Virginia's Twitter Visualization Project. Data were acquired via the Twitter API, collecting all @candidate tweets available for that day. This analysis reflects the availability and sampling methods of information made available through the Twitter API. For questions, please contact Hope McIntyre (hm7zg@virginia.edu), Paul Freedman (pf7h@virginia.edu), or David Leblang (dal7w@virginia.edu).</p>
+	<p>Note: These graphs were produced by the University of Virginia's Twitter Visualization Project. Data were acquired via the Twitter API, collecting all @candidate tweets available for that day. This analysis reflects the availability and sampling methods of information made available through the Twitter API. For questions, please contact Hope McIntyre (hm7zg@virginia.edu), Paul Freedman (freedman@virginia.edu), or David Leblang (dal7w@virginia.edu).</p>
 </body>
 </html>
